@@ -1,0 +1,50 @@
+== June ==
+{{History
+|title = <p>'''JUNE''</p> 
+||date = |vod =|content =
+
+<!-- DAY 80 --> 
+{{History
+|title = Day 80
+|date = June 1st, 2026
+|vod = https://www.youtube.com/watch?v=rLq0HlFdO6o
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}
+
+<!-- DAY 81 --> 
+{{History
+|title = Day 81
+|date = June 2nd, 2026
+|vod = https://www.youtube.com/watch?v=jidmm0sm39E
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}
+
+<!-- DAY — --> 
+{{History
+|title = Day 82
+|date = June 3rd, 2026
+|vod = https://www.youtube.com/watch?v=wn-uANglGp4
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}
+
+<!-- DAY 94 --> 
+{{History
+|title = Day 94
+|date = June 15th, 2026
+|vod = UNAVAILABLE
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}
+
+<!-- DAY 96 --> 
+{{History
+|title = Day 96
+|date = June 17th, 2026
+|vod = https://www.youtube.com/watch?v=HrgtwbUAhho
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}
+}}

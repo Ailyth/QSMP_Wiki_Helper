@@ -1,0 +1,8 @@
+<!-- DAY {{DAY}} --> 
+{{History
+|title = Day {{DAY}}
+|date = {{DATE}}
+|vod =  {{VOD}}
+|text = {{w}} <!--Remove this when the recap is done-->
+|content = TBA 
+}}

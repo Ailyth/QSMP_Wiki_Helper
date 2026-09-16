@@ -1,0 +1,7 @@
+== {{MONTH_NAME}} ==
+{{History
+|title = <p>'''{{MONTH_NAME_UPPER}}'''</p> 
+|date=|vod=|content =
+
+{{DAY_BLOCKS}}
+}}
