@@ -10,7 +10,7 @@ from service import RefreshResult, refresh_data
 from wiki_generator import generate_creator_wiki
 
 
-app = FastAPI(title="Abandoned CCS API", version="1.0.0")
+app = FastAPI(title="QSMP 2 Wiki Helper API", version="1.0.0")
 
 cors_origins = [
     origin.strip()

@@ -5,3 +5,4 @@ service-account.json
 .env
 frontend/node_modules/
 frontend/dist/
+next-steps.md

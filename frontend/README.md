@@ -1,4 +1,4 @@
-# Abandoned CCS frontend
+# QSMP 2 Wiki Helper frontend
 
 ## Local development
 

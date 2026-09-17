@@ -4,8 +4,8 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:800
 
 const tabs = [
   { id: "overview", label: "Overview" },
-  { id: "creators", label: "Creators" },
-  { id: "mismatches", label: "VOD Review" },
+  { id: "creators", label: "Generate lore wiki days" },
+  { id: "mismatches", label: "Timeline Tracking missmatches" },
 ];
 
 async function request(path, options = {}) {
@@ -134,7 +134,7 @@ function App() {
           <span className="brand-mark">CCS</span>
           <div>
             <p className="eyebrow">Wiki desk</p>
-            <h1>Abandoned CCS</h1>
+            <h1>QSMP 2 Wiki Helper</h1>
           </div>
         </div>
         <nav className="nav-tabs" aria-label="Primary navigation">
@@ -177,7 +177,7 @@ function App() {
           <section className="empty-state hero-empty">
             <span className="empty-kicker">Start here</span>
             <h3>Bring the latest timeline into view.</h3>
-            <p>Refresh the connected spreadsheets to populate creator history, wiki previews, and VOD review.</p>
+            <p>Refresh the connected spreadsheets to populate creator history, wiki previews, and Timeline Tracking missmatches.</p>
             <button className="primary-button" onClick={refresh} disabled={loading}>
               {loading ? "Loading sheets..." : "Load spreadsheet data"}
             </button>
@@ -221,7 +221,7 @@ function Overview({ overview, onOpen }) {
         <div>
           <p className="eyebrow">Workspace pulse</p>
           <h3>A clearer way to keep the archive moving.</h3>
-          <p className="lede">Review creator activity, spot missing VODs, and prepare wiki-ready text from one calm workspace.</p>
+          <p className="lede">Spot missing creators in Timeline Tracking spreadsheet, and prepare wiki-ready lore entries from one calm workspace.</p>
         </div>
         <div className="intro-stamp">LIVE<br /><span>sheet sync</span></div>
       </section>
@@ -308,7 +308,7 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
 function MismatchView({ mismatches, downloadMismatches }) {
   return (
     <div className="review-page">
-      <section className="review-heading"><div><p className="eyebrow">Data quality</p><h3>VOD review queue</h3><p className="lede">These VODs do not currently have a matching activity entry.</p></div><button className="secondary-button" onClick={downloadMismatches}>Download CSV</button></section>
+      <section className="review-heading"><div><p className="eyebrow">Data quality</p><h3>Timeline Tracking missmatches queue</h3><p className="lede">These VODs do not currently have a matching activity entry.</p></div><button className="secondary-button" onClick={downloadMismatches}>Download CSV</button></section>
       {mismatches.length === 0 ? <div className="empty-state"><span className="empty-kicker">All clear</span><h3>No mismatches found.</h3><p>The activity and VOD sheets are currently aligned.</p></div> : <section className="table-wrap"><div className="table-head"><span>Date</span><span>Creator</span><span>Title</span><span>Link</span></div>{mismatches.map((item, index) => <div className="table-row" key={`${item.creator}-${item.calendar_day}-${index}`}><span className="date-cell">{item.calendar_day}</span><strong>{item.creator}</strong><span className={item.vod_title?.toLowerCase().includes("qsmp") ? "" : "warning-text"}>{item.vod_title || "Untitled VOD"}</span><a href={item.vod} target="_blank" rel="noreferrer">Open VOD</a></div>)}</section>}
     </div>
   );
