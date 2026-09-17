@@ -254,7 +254,7 @@ Open the frontend URL and select **Refresh data**. After a successful refresh:
 
 - **Overview** shows creator, history, VOD, and review counts.
 - **Creators** provides searchable creator history and wiki previews.
-- **Timeline Tracking missmatches** lists unmatched VODs and supports CSV download.
+- **Timeline Tracking mismatches** lists unmatched VODs and supports CSV download.
 
 ## Troubleshooting
 

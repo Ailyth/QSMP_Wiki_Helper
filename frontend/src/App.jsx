@@ -5,7 +5,7 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:800
 const tabs = [
   { id: "overview", label: "Overview" },
   { id: "creators", label: "Generate lore wiki days" },
-  { id: "mismatches", label: "Timeline Tracking missmatches" },
+  { id: "mismatches", label: "Timeline Tracking mismatches" },
 ];
 
 async function request(path, options = {}) {
@@ -177,7 +177,7 @@ function App() {
           <section className="empty-state hero-empty">
             <span className="empty-kicker">Start here</span>
             <h3>Bring the latest timeline into view.</h3>
-            <p>Refresh the connected spreadsheets to populate creator history, wiki previews, and Timeline Tracking missmatches.</p>
+            <p>Refresh the connected spreadsheets to populate creator history, wiki previews, and Timeline Tracking mismatches.</p>
             <button className="primary-button" onClick={refresh} disabled={loading}>
               {loading ? "Loading sheets..." : "Load spreadsheet data"}
             </button>
@@ -308,7 +308,7 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
 function MismatchView({ mismatches, downloadMismatches }) {
   return (
     <div className="review-page">
-      <section className="review-heading"><div><p className="eyebrow">Data quality</p><h3>Timeline Tracking missmatches queue</h3><p className="lede">These VODs do not currently have a matching activity entry.</p></div><button className="secondary-button" onClick={downloadMismatches}>Download CSV</button></section>
+      <section className="review-heading"><div><p className="eyebrow">Data quality</p><h3>Timeline Tracking mismatches queue</h3><p className="lede">Below you can find any mismatches between the Timeline Tracking spreadsheet and the VODs, with VOD links. Orange highlights indicate potential non-QSMP stream.</p></div><button className="secondary-button" onClick={downloadMismatches}>Download CSV</button></section>
       {mismatches.length === 0 ? <div className="empty-state"><span className="empty-kicker">All clear</span><h3>No mismatches found.</h3><p>The activity and VOD sheets are currently aligned.</p></div> : <section className="table-wrap"><div className="table-head"><span>Date</span><span>Creator</span><span>Title</span><span>Link</span></div>{mismatches.map((item, index) => <div className="table-row" key={`${item.creator}-${item.calendar_day}-${index}`}><span className="date-cell">{item.calendar_day}</span><strong>{item.creator}</strong><span className={item.vod_title?.toLowerCase().includes("qsmp") ? "" : "warning-text"}>{item.vod_title || "Untitled VOD"}</span><a href={item.vod} target="_blank" rel="noreferrer">Open VOD</a></div>)}</section>}
     </div>
   );
