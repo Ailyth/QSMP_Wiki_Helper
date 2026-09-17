@@ -1,14 +1,194 @@
 {
-  "Maximus": {
+  "FitMC": {
+    "display": "FitMC",
+    "aliases": ["fitmc", "fit"]
+  },
+  "Foolish": {
+    "display": "Foolish",
+    "aliases": ["foolish", "fool"]
+  },
+  "Jschlatt": {
+    "display": "Jschlatt",
+    "aliases": ["jschlatt", "schlatt"]
+  },
+  "KatieB": {
+    "display": "KatieB",
+    "aliases": ["katieb", "katie", "realkatieb"]
+  },
+  "Philza": {
+    "display": "Philza",
+    "aliases": ["philza", "phill", "phil"]
+  },
+  "Quackity": {
+    "display": "Quackity",
+    "aliases": ["quackity", "quack", "quackitytoo"]
+  },
+  "TinaKitten": {
+    "display": "TinaKitten",
+    "aliases": ["tina", "kitten", "tinakitten"]
+  },
+  "TommyInit": {
+    "display": "TommyInit",
+    "aliases": ["tommyinit", "tommyinnit", "tommy"]
+  },
+  "Tubbo": {
+    "display": "Tubbo",
+    "aliases": ["tubbo", "tubbolive"]
+  },
+  "Aldo": {
+    "display": "Aldo",
+    "aliases": ["aldo", "aldo_geo", "aldo geo"]
+  },
+  "Alondrissa": {
+    "display": "Alondrissa",
+    "aliases": ["alondrissa", "alondra", "alondrissapluss"]
+  },
+  "CrystalMolly": {
+    "display": "CrystalMolly",
+    "aliases": ["crystalmolly", "crystal", "molly", "mollly"]
+  },
+  "ElAbraham": {
+    "display": "ElAbraham",
+    "aliases": ["elabraham", "abraham", "elabrahaham"]
+  },
+  "ElMariana": {
+    "display": "ElMariana",
+    "aliases": ["elmariana", "mariana"]
+  },
+  "JuanGuarnizo": {
+    "display": "JuanGuarnizo",
+    "aliases": ["juanguarnizo", "juansguarnizo", "juan"]
+  },
+  "Luzu": {
+    "display": "Luzu",
+    "aliases": ["luzu"]
+  },
+    "Maximus": {
     "display": "Maximus",
     "aliases": ["maxo", "max", "maximus", "agentemaxo"]
+  },
+  "Missasinfonia": {
+    "display": "Missasinfonia",
+    "aliases": ["missasinfonia", "missa"]
+  },
+  "Robleis": {
+    "display": "Robleis",
+    "aliases": ["robleis"]
+  },
+  "Roier": {
+    "display": "Roier",
+    "aliases": ["roier"]
+  },
+  "Vegetta": {
+    "display": "Vegetta",
+    "aliases": ["vegetta", "vegeta", "vegetta777"]
+  },
+  "Gabepeixe": {
+    "display": "Gabepeixe",
+    "aliases": ["gabepeixe", "gabe", "gabe?"]
+  },
+  "Mike": {
+    "display": "Mike",
+    "aliases": ["mike", "linkthemike"]
+  },
+  "Pac": {
+    "display": "Pac",
+    "aliases": ["pac", "peqitw"]
+  },
+  "Wuant": {
+    "display": "Wuant",
+    "aliases": ["wuant"]
+  },
+  "Aypierre": {
+    "display": "Aypierre",
+    "aliases": ["aypierre", "pierre"]
+  },
+  "Pressea": {
+    "display": "Pressea",
+    "aliases": ["pressea"]
+  },
+  "Acau": {
+    "display": "Acau",
+    "aliases": ["acau", "acau", "악어∀ (acau)"]
+  },
+  "Jungryeok": {
+    "display": "Jungryeok",
+    "aliases": ["jungryeok", "중력 (jungryeok)"]
+  },
+  "KongKong": {
+    "display": "KongKong",
+    "aliases": ["kongkong", "콩콩 (kongkong)"]
+  },
+  "Yang-dding": {
+    "display": "Yang-dding",
+    "aliases": ["yang-dding", "yd", "양띵 (yd/yangdding)"]
+  },
+  "CastCrafter": {
+    "display": "CastCrafter",
+    "aliases": ["castcrafter", "Castcraftter"]
+  },
+  "LetsHugo": {
+    "display": "LetsHugo",
+    "aliases": ["letshugo", "letshugoTV", "hugo"]
+  },
+  "Wichtiger": {
+    "display": "Wichtiger",
+    "aliases": ["wichtiger"]
   },
   "Ewron": {
     "display": "Ewron",
     "aliases": ["ewron", "ewroon"]
   },
+  "Graf": {
+    "display": "Graf",
+    "aliases": ["graf"]
+  },
+  "Nexe": {
+    "display": "Nexe",
+    "aliases": ["nexe", "nexe_"]
+  },
+  "YoungMulti": {
+    "display": "YoungMulti",
+    "aliases": ["youngmulti", "multi", "mutli"]
+  },
+  "Ashswag": {
+    "display": "Ashswag",
+    "aliases": ["ashswag", "ash"]
+  },
+  "Chapati Hindustani": {
+    "display": "Chapati Hindustani",
+    "aliases": ["chapati hindustani", "chapati", "hindustani", "chapati_007"]
+  },
+  "Khatarnak Ishan": {
+    "display": "Khatarnak Ishan",
+    "aliases": ["khatarnak ishan", "khatarnak", "ishan", "khatarnakishan"]
+  },
+  "SenpaiSpider": {
+    "display": "SenpaiSpider",
+    "aliases": ["senpaispider", "senpai", "spider", "senpaispiderreal", "spidersenpai", "spidder"]
+  },
+  "Djuncan": {
+    "display": "Djuncan",
+    "aliases": ["djuncan", "duncan", "djun"]
+  },
+  "DonKaaklijn": {
+    "display": "DonKaaklijn",
+    "aliases": ["donkaaklijn", "don", "kaaklijn"]
+  },
+  "Jeremy Frieser": {
+    "display": "Jeremy Frieser",
+    "aliases": ["jeremyfrieser", "jeremy", "frieser", "jerremy"]
+  },
   "Shappo": {
     "display": "Shappo",
-    "aliases": ["shapo", "shapoo", "shappo0"]
+    "aliases": ["shappo", "shappo0"]
+  },
+  "Fariis47": {
+    "display": "Fariis47",
+    "aliases": ["fariis47", "faris", "fariis"]
+  },
+  "HaiperExe": {
+    "display": "HaiperExe",
+    "aliases": ["haiperexe", "haiper"]
   }
 }

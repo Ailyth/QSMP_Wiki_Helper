@@ -1,3 +1,5 @@
+from data_cleaning import canonical_name, normalize_calendar_date, is_excluded_creator
+
 # -----------------------------
 # Date Formatting
 # -----------------------------
@@ -96,7 +98,8 @@ def merge_activity_with_vods(grouped_activity, vod_index, creators_json, timelin
         # print("SERVER DAY DECISION:", creator, date, "→", server_day)
 
         # Find VOD
-        vod = vod_index.get((creator, date), "UNAVAILABLE")
+        vod_record = vod_index.get((creator, date), {})
+        vod = vod_record.get("url", "UNAVAILABLE")
 
         # DEBUG 3 — show VOD match
         # print("VOD MATCH:", creator, date, "→", vod)
@@ -136,3 +139,29 @@ def get_all_creators(merged_data):
 
 def get_creator_full_history(merged_data, creator):
     return merged_data.get(creator, [])
+
+
+def find_vod_without_activity(grouped_activity, vod_index):
+    activity_keys = {
+        (canonical_name(creator), normalize_calendar_date(entry["calendar_day"]))
+        for creator, entries in grouped_activity.items()
+        for entry in entries
+        if not is_excluded_creator(creator)
+    }
+
+    return sorted(
+        [
+            {
+                "creator": canonical_name(creator),
+                "calendar_day": normalized_date,
+                "vod": vod_record.get("url", "") if isinstance(vod_record, dict) else vod_record,
+                "vod_title": vod_record.get("title", "") if isinstance(vod_record, dict) else ""
+            }
+            for (creator, date), vod_record in vod_index.items()
+            for normalized_date in [normalize_calendar_date(date)]
+            if normalized_date is not None
+            and not is_excluded_creator(creator)
+            and (canonical_name(creator), normalized_date) not in activity_keys
+        ],
+        key=lambda entry: (entry["calendar_day"], entry["creator"])
+    )

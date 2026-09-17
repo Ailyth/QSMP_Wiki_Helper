@@ -4,7 +4,8 @@ from vod_parser import parse_vod_sheets
 from logic import (
     group_days_by_creator,
     merge_activity_with_vods,
-    get_all_creators
+    get_all_creators,
+    find_vod_without_activity
 )
 import json
 
@@ -36,7 +37,7 @@ def main():
     # print("GROUPED ACTIVITY FOR MAXIMUS:", grouped.get("Maximus"))
 
     # 7. Load JSON creators
-    with open("creators.json") as f:
+    with open("creators.json", encoding="utf-8") as f:
         creators_json = json.load(f)
 
     # 8. Merge activity + VODs
@@ -49,9 +50,10 @@ def main():
 
     # 9. Extract creator list
     creators = get_all_creators(merged)
+    vod_mismatches = find_vod_without_activity(grouped, vod_index)
 
     # 10. Run GUI
-    run_app(creators, merged)
+    run_app(creators, merged, vod_mismatches)
 
 if __name__ == "__main__":
     main()

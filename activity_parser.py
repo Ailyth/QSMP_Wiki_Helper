@@ -1,6 +1,13 @@
-from data_cleaning import normalize_name, canonical_name, parse_day
+from data_cleaning import (
+    normalize_name,
+    canonical_name,
+    normalize_calendar_date,
+    parse_day,
+    is_excluded_creator,
+)
 import json
 import os
+import re
 
 CREATOR_REGISTRY = {}
 
@@ -18,7 +25,7 @@ def split_creators(cell_value):
 
     # Replace common separators with commas
     separators = [",", "/", "&", ";","."]
-    text = cell_value
+    text = re.sub(r"\s*\([^)]*\)", "", cell_value)
 
     for sep in separators:
         text = text.replace(sep, ",")
@@ -28,6 +35,12 @@ def split_creators(cell_value):
 
     # Remove empty entries
     return [p for p in parts if p]
+
+
+def clean_creator_label(value):
+    value = re.sub(r"\s*\([^)]*\)", "", value)
+    value = re.sub(r"\s+x\d+\s*$", "", value, flags=re.IGNORECASE)
+    return value.strip()
 
 
 def parse_activity_rows(rows, creator_registry):
@@ -47,8 +60,10 @@ def parse_activity_rows(rows, creator_registry):
         left, right = raw_day.split("/", 1)
         server_day = int(left.strip())
 
-        day, month, year = right.strip().split(".")
-        normalized_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+        normalized_date = normalize_calendar_date(right.strip())
+        if normalized_date is None:
+            print("Skipping invalid activity date:", raw_day)
+            continue
 
         # Scan all language columns
         for col in creator_columns:
@@ -61,7 +76,10 @@ def parse_activity_rows(rows, creator_registry):
             creators = split_creators(raw_value)
 
             for c in creators:
-                norm = normalize_name(c)
+                if is_excluded_creator(clean_creator_label(c)):
+                    continue
+
+                norm = normalize_name(clean_creator_label(c))
                 canon = canonical_name(norm)
 
                 cleaned.append({
@@ -70,7 +88,7 @@ def parse_activity_rows(rows, creator_registry):
                     "calendar_day": normalized_date
                 })
 
-                print("PARSED ACTIVITY:", normalized_date, server_day, canon)
+                # print("PARSED ACTIVITY:", normalized_date, server_day, canon)
 
     return cleaned
 
@@ -78,16 +96,9 @@ def parse_activity_sheets(sheets):
     all_rows = []
     date_to_server_day = {}
 
-    allowed_months = {"June", "July"}  # TEMPORARY FILTER
-
     for ws in sheets:
-        # Skip sheets outside allowed months
-        if ws.title not in allowed_months:
-            print("Skipping sheet:", ws.title)
-            continue
-
         raw_values = ws.get_all_values()
-        print("RAW HEADERS:", raw_values[0])
+        print(f'Processing sheet: {ws.title} with {raw_values[0]} rows')
 
         # Skip sheets with empty headers
         if all(h.strip() == "" for h in raw_values[0]):
@@ -108,7 +119,7 @@ def parse_activity_sheets(sheets):
         ]
 
         # Load alias registry
-        with open("creators.json") as f:
+        with open("creators.json", encoding="utf-8") as f:
             creator_registry = json.load(f)
 
         # Parse activity rows for this sheet

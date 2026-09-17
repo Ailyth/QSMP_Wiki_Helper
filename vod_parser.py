@@ -1,4 +1,4 @@
-from data_cleaning import normalize_name, canonical_name
+from data_cleaning import canonical_name, normalize_calendar_date, is_excluded_creator
 
 def is_month_sheet(name):
     parts = name.split()
@@ -12,6 +12,7 @@ def detect_columns(row):
     date_col = None
     creator_col = None
     vod_col = None
+    title_col = None
 
     for key in row.keys():
         normalized = key.lower().replace(" ", "").replace("/", "").replace("-", "").replace("\n", "")
@@ -25,13 +26,15 @@ def detect_columns(row):
 
         elif "youtubevodsurl" in normalized:
             vod_col = key
+        elif "youtubevodstitle" in normalized:
+            title_col = key
 
-    return date_col, creator_col, vod_col
+    return date_col, creator_col, vod_col, title_col
 
 def parse_vod_rows(rows):
     index = {}
 
-    date_col, creator_col, vod_col = detect_columns(rows[0])
+    date_col, creator_col, vod_col, title_col = detect_columns(rows[0])
 
     if not date_col or not creator_col or not vod_col:
         raise ValueError("Could not detect required VOD columns.")
@@ -41,32 +44,32 @@ def parse_vod_rows(rows):
 
         raw_date = row[date_col]
 
-        # Normalize date
-        date = raw_date.split("T")[0].replace("/", "-")
+        date = normalize_calendar_date(raw_date)
+        if date is None:
+            if str(raw_date).strip().upper() not in {"", "N/A", "NA", "-"}:
+                print("Skipping invalid VOD date:", raw_date)
+            continue
 
         # Normalize + canonicalize creator
+        if is_excluded_creator(raw_creator):
+            continue
+
         creator = canonical_name(raw_creator)
 
         vod = row[vod_col]
+        title = row.get(title_col, "") if title_col else ""
 
         # print("VOD KEY:", creator, date, "→", vod)
-        index[(creator, date)] = vod
+        index[(creator, date)] = {"url": vod, "title": title}
 
     return index
 
 def parse_vod_sheets(sheets):
     vod_index = {}
 
-    allowed_months = {"June", "July"}
-
     for ws in sheets:
-        # Skip sheets not in allowed months
         parts = ws.title.split()
         if len(parts) != 2:
-            continue
-
-        month, year = parts
-        if month not in allowed_months:
             continue
 
         raw_values = ws.get_all_values()
