@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
+import os
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from service import RefreshResult, refresh_data
@@ -9,6 +11,22 @@ from wiki_generator import generate_creator_wiki
 
 
 app = FastAPI(title="Abandoned CCS API", version="1.0.0")
+
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 _cached_result: RefreshResult | None = None
 _last_refresh: datetime | None = None

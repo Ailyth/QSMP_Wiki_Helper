@@ -2,3 +2,6 @@ credentials.json
 token.json
 *__pycache__/
 service-account.json
+.env
+frontend/node_modules/
+frontend/dist/
