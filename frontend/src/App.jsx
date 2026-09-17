@@ -34,6 +34,8 @@ function App() {
   const [selectedCreator, setSelectedCreator] = useState("");
   const [creatorData, setCreatorData] = useState(null);
   const [wiki, setWiki] = useState("");
+  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedMonths, setSelectedMonths] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingCreator, setLoadingCreator] = useState(false);
@@ -85,10 +87,43 @@ function App() {
       ]);
       setCreatorData(history);
       setWiki(wikiData.wiki);
+      setSelectedDay("");
+      setSelectedMonths([]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setLoadingCreator(false);
+    }
+  }
+
+  async function generateDayTemplate() {
+    if (!selectedCreator || !selectedDay) return;
+
+    setError("");
+    try {
+      const dayData = await request(
+        `/api/creators/${encodeURIComponent(selectedCreator)}/days/${encodeURIComponent(selectedDay)}/wiki`,
+      );
+      setWiki(dayData.wiki);
+      setNotice("Single-day template generated.");
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  async function generateMonthTemplates() {
+    if (!selectedCreator || !selectedMonths.length) return;
+
+    setError("");
+    try {
+      const monthQuery = encodeURIComponent(selectedMonths.join(","));
+      const monthData = await request(
+        `/api/creators/${encodeURIComponent(selectedCreator)}/wiki?months=${monthQuery}`,
+      );
+      setWiki(monthData.wiki);
+      setNotice("Selected month templates generated.");
+    } catch (requestError) {
+      setError(requestError.message);
     }
   }
 
@@ -194,6 +229,12 @@ function App() {
             selectCreator={selectCreator}
             creatorData={creatorData}
             wiki={wiki}
+            selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
+            generateDayTemplate={generateDayTemplate}
+            selectedMonths={selectedMonths}
+            setSelectedMonths={setSelectedMonths}
+            generateMonthTemplates={generateMonthTemplates}
             loadingCreator={loadingCreator}
             copyWiki={copyWiki}
             downloadWiki={downloadWiki}
@@ -229,7 +270,22 @@ function Overview({ overview }) {
   );
 }
 
-function CreatorsView({ creators, search, setSearch, selectedCreator, selectCreator, creatorData, wiki, loadingCreator, copyWiki, downloadWiki }) {
+function CreatorsView({ creators, search, setSearch, selectedCreator, selectCreator, creatorData, wiki, selectedDay, setSelectedDay, generateDayTemplate, selectedMonths, setSelectedMonths, generateMonthTemplates, loadingCreator, copyWiki, downloadWiki }) {
+  const availableMonths = creatorData
+    ? [...new Set(creatorData.history.map((entry) => entry.wiki_date.split(" ")[0]))]
+    : [];
+  const visibleHistory = creatorData?.history.filter((entry) => {
+    if (!selectedMonths.length) return true;
+    return selectedMonths.includes(entry.wiki_date.split(" ")[0]);
+  }) || [];
+
+  function toggleMonth(month) {
+    setSelectedMonths((currentMonths) => currentMonths.includes(month)
+      ? currentMonths.filter((currentMonth) => currentMonth !== month)
+      : [...currentMonths, month]);
+    setSelectedDay("");
+  }
+
   return (
     <div className="creator-layout">
       <section className="creator-list-panel">
@@ -262,10 +318,33 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
               <div><p className="eyebrow">Creator history</p><h3>{creatorData.creator}</h3></div>
               <span className="count-badge">{creatorData.history.length} entries</span>
             </div>
+            <div className="month-filter-controls">
+              <span className="filter-label">Show and generate months</span>
+              <div className="month-options">
+                {availableMonths.map((month) => (
+                  <label className="month-option" key={month}>
+                    <input
+                      type="checkbox"
+                      checked={selectedMonths.includes(month)}
+                      onChange={() => toggleMonth(month)}
+                    />
+                    {month}
+                  </label>
+                ))}
+              </div>
+              <button className="secondary-button small" onClick={generateMonthTemplates} disabled={!selectedMonths.length}>
+                Generate selected months
+              </button>
+              {selectedMonths.length > 0 && (
+                <button className="text-button" onClick={() => setSelectedMonths([])}>
+                  Show all months
+                </button>
+              )}
+            </div>
             <div className="history-list">
-              {creatorData.history.map((entry) => (
+              {visibleHistory.map((entry) => (
                 <div className="history-row" key={`${entry.calendar_day}-${entry.server_day}`}>
-                  <span className="day-number">{entry.server_day}</span>
+                  <span className="day-number">Server day {entry.server_day}</span>
                   <div><strong>{entry.wiki_date}</strong><span>{entry.vod === "UNAVAILABLE" ? "VOD unavailable" : "VOD linked"}</span></div>
                   <a href={entry.vod === "UNAVAILABLE" ? undefined : entry.vod} target="_blank" rel="noreferrer">{entry.vod === "UNAVAILABLE" ? "-" : "Open VOD"}</a>
                 </div>
@@ -273,6 +352,20 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
             </div>
             <div className="wiki-panel">
               <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button><button className="secondary-button small" onClick={downloadWiki}>Download</button></div></div>
+              <div className="day-template-controls">
+                <label htmlFor="day-template-select">Generate one day</label>
+                <select id="day-template-select" value={selectedDay} onChange={(event) => setSelectedDay(event.target.value)}>
+                  <option value="">Select a day</option>
+                  {visibleHistory.map((entry) => (
+                    <option key={entry.calendar_day} value={entry.calendar_day}>
+                      Day {entry.server_day} - {entry.wiki_date}
+                    </option>
+                  ))}
+                </select>
+                <button className="secondary-button small" onClick={generateDayTemplate} disabled={!selectedDay}>
+                  Generate day template
+                </button>
+              </div>
               <textarea value={wiki} readOnly aria-label="Generated wiki text" />
             </div>
           </>

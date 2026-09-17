@@ -2,12 +2,12 @@ from datetime import datetime, timezone
 import os
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from service import RefreshResult, refresh_data
-from wiki_generator import generate_creator_wiki
+from wiki_generator import generate_creator_wiki, generate_day_block
 
 
 app = FastAPI(title="QSMP 2 Wiki Helper API", version="1.0.0")
@@ -157,14 +157,60 @@ def creator_history(creator: str) -> CreatorResponse:
 
 
 @app.get("/api/creators/{creator}/wiki", response_model=WikiResponse)
-def creator_wiki(creator: str) -> WikiResponse:
+def creator_wiki(
+    creator: str,
+    months: str | None = Query(default=None),
+) -> WikiResponse:
     result = _require_data()
-    if creator not in result.merged_data:
+    history = result.merged_data.get(creator)
+    if history is None:
         raise HTTPException(status_code=404, detail=f"Creator not found: {creator}")
+
+    if months:
+        selected_months = {
+            month.strip().lower()
+            for month in months.split(",")
+            if month.strip()
+        }
+        history = [
+            entry
+            for entry in history
+            if entry.get("wiki_date", "").split(maxsplit=1)[0].lower()
+            in selected_months
+        ]
+
+        if not history:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No history entries found for {creator} in the selected months",
+            )
 
     return WikiResponse(
         creator=creator,
-        wiki=generate_creator_wiki(result.merged_data, creator),
+        wiki=generate_creator_wiki({creator: history}, creator),
+    )
+
+
+@app.get("/api/creators/{creator}/days/{calendar_day}/wiki", response_model=WikiResponse)
+def creator_day_wiki(creator: str, calendar_day: str) -> WikiResponse:
+    result = _require_data()
+    history = result.merged_data.get(creator)
+    if history is None:
+        raise HTTPException(status_code=404, detail=f"Creator not found: {creator}")
+
+    entry = next(
+        (item for item in history if item.get("calendar_day") == calendar_day),
+        None,
+    )
+    if entry is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No history entry found for {creator} on {calendar_day}",
+        )
+
+    return WikiResponse(
+        creator=creator,
+        wiki=generate_day_block(entry),
     )
 
 
