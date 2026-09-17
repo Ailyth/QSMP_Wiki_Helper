@@ -184,7 +184,7 @@ function App() {
           </section>
         )}
 
-        {ready && activeTab === "overview" && <Overview overview={overview} onOpen={(tab) => setActiveTab(tab)} />}
+        {ready && activeTab === "overview" && <Overview overview={overview} />}
         {ready && activeTab === "creators" && (
           <CreatorsView
             creators={filteredCreators}
@@ -207,41 +207,18 @@ function App() {
   );
 }
 
-function Overview({ overview, onOpen }) {
-  const metrics = [
-    { label: "Creators tracked", value: overview?.total_creators ?? 0, tone: "green" },
-    { label: "History entries", value: overview?.total_history_entries ?? 0, tone: "blue" },
-    { label: "Missing VODs", value: overview?.missing_vod_count ?? 0, tone: "amber" },
-    { label: "Review queue", value: overview?.mismatch_count ?? 0, tone: "red" },
-  ];
-
+function Overview({ overview }) {
   return (
     <div className="page-grid">
       <section className="intro-panel">
         <div>
           <p className="eyebrow">Workspace pulse</p>
-          <h3>A clearer way to keep the archive moving.</h3>
+          <h3>Review creator activity and prepare wiki entries.</h3>
           <p className="lede">Spot missing creators in Timeline Tracking spreadsheet, and prepare wiki-ready lore entries from one calm workspace.</p>
         </div>
         <div className="intro-stamp">LIVE<br /><span>sheet sync</span></div>
       </section>
-      <section className="metric-grid">
-        {metrics.map((metric) => (
-          <article className={`metric-card ${metric.tone}`} key={metric.label}>
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-          </article>
-        ))}
-      </section>
       <section className="overview-lower">
-        <article className="action-panel">
-          <div>
-            <p className="eyebrow">Next useful action</p>
-            <h3>Review the VOD queue</h3>
-            <p>Check entries that appear in the VOD sheet but not in timeline activity.</p>
-          </div>
-          <button className="secondary-button" onClick={() => onOpen("mismatches")}>Open review</button>
-        </article>
         <article className="sync-panel">
           <p className="eyebrow">Last successful refresh</p>
           <strong>{formatRefreshTime(overview?.last_refresh)}</strong>
