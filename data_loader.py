@@ -1,19 +1,19 @@
+import os
 import gspread
 from google.oauth2.service_account import Credentials
 from vod_parser import is_month_sheet
-import os
-
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-SERVICE_ACCOUNT_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "service-account.json"
+
+SERVICE_ACCOUNT_PATH = os.environ.get(
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    os.path.join(os.path.dirname(__file__), "service-account.json"),
 )
 
 def authorize():
     creds = Credentials.from_service_account_file(
         SERVICE_ACCOUNT_PATH,
-        scopes=SCOPES
+        scopes=SCOPES,
     )
     return gspread.authorize(creds)
 

@@ -13,9 +13,9 @@ from logic import (
 )
 from vod_parser import parse_vod_sheets
 
+ACTIVITY_URL = os.environ["ACTIVITY_SHEET_URL"]
+VOD_URL = os.environ["VOD_SHEET_URL"]
 
-ACTIVITY_URL = "https://docs.google.com/spreadsheets/d/1sOnTqp0W_VwtJTcp3o67gbX5q4HqnkcLuj8dXNtAoic"
-VOD_URL = "https://docs.google.com/spreadsheets/d/1yKkzNTjkFzyqNsUPRkWoqHtqDeOD9FoCjjDmzIJn_gE"
 CREATORS_PATH = os.path.join(os.path.dirname(__file__), "creators.json")
 
 
