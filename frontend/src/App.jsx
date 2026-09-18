@@ -100,13 +100,13 @@ function App() {
     }
   }
 
-  async function generateDayTemplate() {
-    if (!selectedCreator || !selectedDay) return;
+  async function generateDayTemplate(day = selectedDay) {
+    if (!selectedCreator || !day) return;
 
     setError("");
     try {
       const dayData = await request(
-        `/api/creators/${encodeURIComponent(selectedCreator)}/days/${encodeURIComponent(selectedDay)}/wiki`,
+        `/api/creators/${encodeURIComponent(selectedCreator)}/days/${encodeURIComponent(day)}/wiki`,
       );
       setWiki(dayData.wiki);
       setNotice("Single-day template generated.");
@@ -115,12 +115,12 @@ function App() {
     }
   }
 
-  async function generateMonthTemplates() {
-    if (!selectedCreator || !selectedMonths.length) return;
+  async function generateMonthTemplates(months = selectedMonths) {
+    if (!selectedCreator || !months.length) return;
 
     setError("");
     try {
-      const monthQuery = encodeURIComponent(selectedMonths.join(","));
+      const monthQuery = encodeURIComponent(months.join(","));
       const monthData = await request(
         `/api/creators/${encodeURIComponent(selectedCreator)}/wiki?months=${monthQuery}`,
       );
@@ -284,10 +284,22 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
   }) || [];
 
   function toggleMonth(month) {
-    setSelectedMonths((currentMonths) => currentMonths.includes(month)
-      ? currentMonths.filter((currentMonth) => currentMonth !== month)
-      : [...currentMonths, month]);
+    const nextMonths = selectedMonths.includes(month)
+      ? selectedMonths.filter((currentMonth) => currentMonth !== month)
+      : [...selectedMonths, month];
+
+    setSelectedMonths(nextMonths);
     setSelectedDay("");
+    if (nextMonths.length) {
+      generateMonthTemplates(nextMonths);
+    }
+  }
+
+  function selectDay(day) {
+    setSelectedDay(day);
+    if (day) {
+      generateDayTemplate(day);
+    }
   }
 
   return (
@@ -361,7 +373,7 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
               <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button><button className="secondary-button small" onClick={downloadWiki}>Download</button></div></div>
               <div className="day-template-controls">
                 <label htmlFor="day-template-select">Generate one day</label>
-                <select id="day-template-select" value={selectedDay} onChange={(event) => setSelectedDay(event.target.value)}>
+                <select id="day-template-select" value={selectedDay} onChange={(event) => selectDay(event.target.value)}>
                   <option value="">Select a day</option>
                   {visibleHistory.map((entry) => (
                     <option key={entry.calendar_day} value={entry.calendar_day}>
