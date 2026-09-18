@@ -370,7 +370,7 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
               })}
             </div>
             <div className="wiki-panel">
-              <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button><button className="secondary-button small" onClick={downloadWiki}>Download</button></div></div>
+              <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button></div></div>
               <div className="day-template-controls">
                 <label htmlFor="day-template-select">Generate one day</label>
                 <select id="day-template-select" value={selectedDay} onChange={(event) => selectDay(event.target.value)}>
