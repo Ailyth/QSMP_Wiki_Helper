@@ -29,6 +29,10 @@ function hasVod(value) {
   return typeof value === "string" && value.trim() !== "" && value.trim().toUpperCase() !== "UNAVAILABLE";
 }
 
+function vodUrls(value) {
+  return hasVod(value) ? value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean) : [];
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [health, setHealth] = useState(null);
@@ -359,12 +363,13 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
             </div>
             <div className="history-list">
               {visibleHistory.map((entry) => {
-                const vodLinked = hasVod(entry.vod);
+                const urls = vodUrls(entry.vod);
+                const vodLinked = urls.length > 0;
                 return (
                 <div className="history-row" key={`${entry.calendar_day}-${entry.server_day}`}>
                   <span className="day-number">Server day {entry.server_day}</span>
                   <div><strong>{entry.wiki_date}</strong><span>{vodLinked ? "VOD linked" : "VOD unavailable"}</span></div>
-                  {vodLinked ? <a href={entry.vod.trim()} target="_blank" rel="noreferrer">Open VOD</a> : <span>-</span>}
+                  {vodLinked ? <div>{urls.map((url, index) => <a href={url} target="_blank" rel="noreferrer" key={url}>{`Open VOD${urls.length > 1 ? ` ${index + 1}` : ""}`}</a>)}</div> : <span>-</span>}
                 </div>
                 );
               })}
@@ -381,9 +386,6 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
                     </option>
                   ))}
                 </select>
-                <button className="secondary-button small" onClick={generateDayTemplate} disabled={!selectedDay}>
-                  Generate day template
-                </button>
               </div>
               <textarea value={wiki} readOnly aria-label="Generated wiki text" />
             </div>

@@ -1,3 +1,5 @@
+import re
+
 from data_cleaning import canonical_name, normalize_calendar_date, is_excluded_creator
 
 def is_month_sheet(name):
@@ -56,9 +58,12 @@ def parse_vod_rows(rows):
 
         creator = canonical_name(raw_creator)
 
-        vod = str(row[vod_col]).strip()
-        if vod.upper() in {"", "N/A", "NA", "-"}:
+        vod_urls = [url.strip() for url in re.split(r"(?=https?://)", str(row[vod_col])) if url.strip()]
+        vod_urls = [url for url in vod_urls if url.upper() not in {"N/A", "NA", "-"}]
+        if not vod_urls:
             vod = "UNAVAILABLE"
+        else:
+            vod = vod_urls[0]
         title = row.get(title_col, "") if title_col else ""
 
         # print("VOD KEY:", creator, date, "→", vod)
