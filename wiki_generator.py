@@ -12,14 +12,13 @@ def generate_day_block(entry):
     day = str(entry["server_day"])
     date = entry["wiki_date"]      # already wiki formatted
     vod = entry["vod"]
-    if vod == "UNAVAILABLE":
-        vod = ""
+    vod_link = "UNAVAILABLE" if vod == "UNAVAILABLE" else f"{{{{Link|Youtube|url={vod}}}}}"
 
     return (
         template
         .replace("{{DAY}}", day)
         .replace("{{DATE}}", date)
-        .replace("{{VOD}}", vod)
+        .replace("{{VOD_LINK}}", vod_link)
     )
 
 

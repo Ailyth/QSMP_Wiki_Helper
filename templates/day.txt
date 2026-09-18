@@ -2,7 +2,7 @@
 {{History
 |title = Day {{DAY}}
 |date = {{DATE}}
-|vod =  {{VOD}}
+|vod =  {{VOD_LINK}}
 |text = {{w}} <!--Remove this when the recap is done-->
 |content = TBA 
 }}
