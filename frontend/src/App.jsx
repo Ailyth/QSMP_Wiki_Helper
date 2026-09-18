@@ -25,6 +25,10 @@ function formatRefreshTime(value) {
   }).format(new Date(value));
 }
 
+function hasVod(value) {
+  return typeof value === "string" && value.trim() !== "" && value.trim().toUpperCase() !== "UNAVAILABLE";
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
   const [health, setHealth] = useState(null);
@@ -342,13 +346,16 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
               )}
             </div>
             <div className="history-list">
-              {visibleHistory.map((entry) => (
+              {visibleHistory.map((entry) => {
+                const vodLinked = hasVod(entry.vod);
+                return (
                 <div className="history-row" key={`${entry.calendar_day}-${entry.server_day}`}>
                   <span className="day-number">Server day {entry.server_day}</span>
-                  <div><strong>{entry.wiki_date}</strong><span>{entry.vod === "UNAVAILABLE" ? "VOD unavailable" : "VOD linked"}</span></div>
-                  <a href={entry.vod === "UNAVAILABLE" ? undefined : entry.vod} target="_blank" rel="noreferrer">{entry.vod === "UNAVAILABLE" ? "-" : "Open VOD"}</a>
+                  <div><strong>{entry.wiki_date}</strong><span>{vodLinked ? "VOD linked" : "VOD unavailable"}</span></div>
+                  {vodLinked ? <a href={entry.vod.trim()} target="_blank" rel="noreferrer">Open VOD</a> : <span>-</span>}
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="wiki-panel">
               <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button><button className="secondary-button small" onClick={downloadWiki}>Download</button></div></div>

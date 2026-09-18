@@ -11,7 +11,9 @@ def generate_day_block(entry):
 
     day = str(entry["server_day"])
     date = entry["wiki_date"]      # already wiki formatted
-    vod = entry["vod"]                # already final URL
+    vod = entry["vod"]
+    if vod == "UNAVAILABLE":
+        vod = ""
 
     return (
         template

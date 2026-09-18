@@ -56,7 +56,9 @@ def parse_vod_rows(rows):
 
         creator = canonical_name(raw_creator)
 
-        vod = row[vod_col]
+        vod = str(row[vod_col]).strip()
+        if vod.upper() in {"", "N/A", "NA", "-"}:
+            vod = "UNAVAILABLE"
         title = row.get(title_col, "") if title_col else ""
 
         # print("VOD KEY:", creator, date, "→", vod)
