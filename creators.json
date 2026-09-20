@@ -9,7 +9,7 @@
   },
   "Jschlatt": {
     "display": "Jschlatt",
-    "aliases": ["jschlatt", "schlatt"]
+    "aliases": ["jschlatt", "schlatt", "jschlattvods"]
   },
   "KatieB": {
     "display": "KatieB",
@@ -21,7 +21,7 @@
   },
   "Quackity": {
     "display": "Quackity",
-    "aliases": ["quackity", "quack", "quackitytoo"]
+    "aliases": ["quackity", "quack", "quackitytoo","quackityvods", "elalexquackity vods"]
   },
   "TinaKitten": {
     "display": "TinaKitten",
@@ -29,7 +29,7 @@
   },
   "TommyInit": {
     "display": "TommyInit",
-    "aliases": ["tommyinit", "tommyinnit", "tommy"]
+    "aliases": ["tommyinit", "tommyinnit", "tommy", "tommyvods"]
   },
   "Tubbo": {
     "display": "Tubbo",
@@ -37,7 +37,7 @@
   },
   "Aldo": {
     "display": "Aldo",
-    "aliases": ["aldo", "aldo_geo", "aldo geo"]
+    "aliases": ["aldo", "aldo_geo", "aldo geo", "aldo_geo plus"]
   },
   "Alondrissa": {
     "display": "Alondrissa",
@@ -45,7 +45,7 @@
   },
   "CrystalMolly": {
     "display": "CrystalMolly",
-    "aliases": ["crystalmolly", "crystal", "molly", "mollly"]
+    "aliases": ["crystalmolly", "crystal", "molly", "mollly", "crystal molly vods"]
   },
   "ElAbraham": {
     "display": "ElAbraham",
@@ -57,7 +57,7 @@
   },
   "JuanGuarnizo": {
     "display": "JuanGuarnizo",
-    "aliases": ["juanguarnizo", "juansguarnizo", "juan"]
+    "aliases": ["juanguarnizo", "juansguarnizo", "juan", "juaniquilador plus"]
   },
   "Luzu": {
     "display": "Luzu",
@@ -73,11 +73,11 @@
   },
   "Robleis": {
     "display": "Robleis",
-    "aliases": ["robleis"]
+    "aliases": ["robleis", "robleisiutu"]
   },
   "Roier": {
     "display": "Roier",
-    "aliases": ["roier"]
+    "aliases": ["roier", "mecoier"]
   },
   "Vegetta": {
     "display": "Vegetta",
@@ -101,7 +101,7 @@
   },
   "Aypierre": {
     "display": "Aypierre",
-    "aliases": ["aypierre", "pierre"]
+    "aliases": ["aypierre", "pierre", "aypierre tv - gaming "]
   },
   "Pressea": {
     "display": "Pressea",
@@ -121,7 +121,7 @@
   },
   "Yang-dding": {
     "display": "Yang-dding",
-    "aliases": ["yang-dding", "yd", "양띵 (yd/yangdding)"]
+    "aliases": ["yang-dding", "yd", "양띵 (yd/yangdding)", "yd(yangdding) gaming channel"]
   },
   "CastCrafter": {
     "display": "CastCrafter",
@@ -133,7 +133,7 @@
   },
   "Wichtiger": {
     "display": "Wichtiger",
-    "aliases": ["wichtiger"]
+    "aliases": ["wichtiger", "wichtiger-vod"]
   },
   "Ewron": {
     "display": "Ewron",
@@ -189,6 +189,6 @@
   },
   "HaiperExe": {
     "display": "HaiperExe",
-    "aliases": ["haiperexe", "haiper"]
+    "aliases": ["haiperexe", "haiper", "haiper also"]
   }
 }

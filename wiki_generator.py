@@ -1,5 +1,49 @@
 import os
 
+
+def format_status(record):
+    return "official" if record.get("official") else "unofficial"
+
+
+def build_vod_markup(entry):
+    records = entry.get("vods")
+    if records is None:
+        records = [{
+            "url": entry.get("vod", "UNAVAILABLE"),
+            "platform": "Youtube",
+            "official": False,
+            "timestamp": "",
+        }]
+
+    records = [record for record in records if record.get("url") != "UNAVAILABLE"]
+    if not records:
+        return "UNAVAILABLE"
+
+    creator = entry.get("creator", "")
+    if len(records) == 1:
+        record = records[0]
+        platform = record.get("platform", "Youtube")
+        return (
+            f"{{{{Link|{platform}|url={record['url']}}}}} "
+            f"({format_status(record)})"
+        )
+
+    template_path = os.path.join("templates", "off_stream.txt")
+    with open(template_path, "r", encoding="utf-8") as file:
+        template = file.read()
+
+    fields = []
+    for index, record in enumerate(records, start=1):
+        suffix = "" if index == 1 else f" {index}"
+        fields.extend([
+            f"|pov{suffix}={creator}",
+            f"|url{suffix}={record['url']}",
+            f"|platform{suffix}={record.get('platform', 'Unknown')}",
+            f"|timestamp{suffix}={record.get('timestamp', '')} ({format_status(record)})",
+        ])
+
+    return template.replace("{{OFF_STREAM_FIELDS}}", "\n".join(fields)).rstrip()
+
 # -----------------------------
 # Day Block Generator
 # -----------------------------
@@ -11,8 +55,7 @@ def generate_day_block(entry):
 
     day = str(entry["server_day"])
     date = entry["wiki_date"]      # already wiki formatted
-    vod = entry["vod"]
-    vod_link = "UNAVAILABLE" if vod == "UNAVAILABLE" else f"{{{{Link|Youtube|url={vod}}}}}"
+    vod_link = build_vod_markup(entry)
 
     return (
         template

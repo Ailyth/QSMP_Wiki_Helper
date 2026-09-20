@@ -14,6 +14,8 @@ ALIAS_MAP = {}
 
 for canonical, data in CREATORS.items():
     ALIAS_MAP[canonical.lower()] = canonical
+    display_name = data.get("display", canonical)
+    ALIAS_MAP[display_name.lower()] = canonical
     for alias in data["aliases"]:
         ALIAS_MAP[alias.lower()] = canonical
 

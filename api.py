@@ -129,7 +129,11 @@ def overview() -> OverviewResponse:
         for entry in history
         if isinstance(entry.get("server_day"), int)
     }
-    missing_vods = [entry for entry in history if entry.get("vod") == "UNAVAILABLE"]
+    missing_vods = [
+        entry for entry in history
+        if not entry.get("vods")
+        or all(vod.get("url") == "UNAVAILABLE" for vod in entry["vods"])
+    ]
 
     return OverviewResponse(
         total_creators=len(result.creators),

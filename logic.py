@@ -98,8 +98,12 @@ def merge_activity_with_vods(grouped_activity, vod_index, creators_json, timelin
         # print("SERVER DAY DECISION:", creator, date, "→", server_day)
 
         # Find VOD
-        vod_record = vod_index.get((creator, date), {})
-        vod = vod_record.get("url", "UNAVAILABLE")
+        vod_records = vod_index.get((creator, date), [])
+        if isinstance(vod_records, dict):
+            vod_records = [vod_records]
+
+        vod_urls = [record.get("url", "UNAVAILABLE") for record in vod_records]
+        vod = "\n".join(url for url in vod_urls if url != "UNAVAILABLE") or "UNAVAILABLE"
 
         # DEBUG 3 — show VOD match
         # print("VOD MATCH:", creator, date, "→", vod)
@@ -108,7 +112,9 @@ def merge_activity_with_vods(grouped_activity, vod_index, creators_json, timelin
             "server_day": server_day,
             "calendar_day": date,
             "wiki_date": format_wiki_date(date),
-            "vod": vod
+            "vod": vod,
+            "vods": vod_records,
+            "creator": creator,
         })
 
     return merged
@@ -154,10 +160,11 @@ def find_vod_without_activity(grouped_activity, vod_index):
             {
                 "creator": canonical_name(creator),
                 "calendar_day": normalized_date,
-                "vod": vod_record.get("url", "") if isinstance(vod_record, dict) else vod_record,
-                "vod_title": vod_record.get("title", "") if isinstance(vod_record, dict) else ""
+                "vod": record.get("url", ""),
+                "vod_title": record.get("title", ""),
             }
             for (creator, date), vod_record in vod_index.items()
+            for record in (vod_record if isinstance(vod_record, list) else [vod_record])
             for normalized_date in [normalize_calendar_date(date)]
             if normalized_date is not None
             and not is_excluded_creator(creator)
