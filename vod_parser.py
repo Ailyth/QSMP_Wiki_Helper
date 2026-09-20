@@ -37,12 +37,14 @@ def detect_columns(row):
     vod_col = None
     title_col = None
     channel_col = None
+    day_col = None
 
     for key in row.keys():
         normalized = key.lower().replace(" ", "").replace("/", "").replace("-", "").replace("\n", "")
 
-        # Must match "streamdate", not "day"
-        if "streamdate" in normalized:
+        if normalized == "day":
+            day_col = key
+        elif "streamdate" in normalized:
             date_col = key
 
         elif "streamer" in normalized:
@@ -55,7 +57,7 @@ def detect_columns(row):
         elif normalized == "channel":
             channel_col = key
 
-    return date_col, creator_col, vod_col, title_col, channel_col
+    return date_col, creator_col, vod_col, title_col, channel_col, day_col
 
 
 def parse_stream_timestamp(value, source_order):
@@ -70,7 +72,8 @@ def parse_stream_timestamp(value, source_order):
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
 
-    return (parsed.astimezone(timezone.utc), source_order), parsed.strftime("%H:%M:%S")
+    parsed = parsed.astimezone(timezone.utc)
+    return (parsed, source_order), parsed
 
 
 def detect_platform(url):
@@ -83,13 +86,33 @@ def detect_platform(url):
 
     return "Unknown"
 
+
+def assign_periods(records):
+    records.sort(key=lambda record: record.get("stream_order", ""))
+    previous_datetime = None
+
+    for record in records:
+        stream_order = record.get("stream_order", "")
+        try:
+            stream_datetime = datetime.fromisoformat(stream_order)
+        except ValueError:
+            record["timestamp"] = "Unknown"
+            continue
+
+        if previous_datetime is None:
+            record["timestamp"] = "Morning"
+        else:
+            elapsed = stream_datetime - previous_datetime
+            record["timestamp"] = "Evening" if elapsed.total_seconds() >= 3 * 60 * 60 else "Morning"
+        previous_datetime = stream_datetime
+
 def parse_vod_rows(rows):
     index = {}
 
     if not rows:
         return index
 
-    date_col, creator_col, vod_col, title_col, channel_col = detect_columns(rows[0])
+    date_col, creator_col, vod_col, title_col, channel_col, day_col = detect_columns(rows[0])
 
     if not date_col or not creator_col or not vod_col:
         raise ValueError("Could not detect required VOD columns.")
@@ -112,11 +135,13 @@ def parse_vod_rows(rows):
         creator = canonical_name(raw_creator)
         channel = canonical_name(row.get(channel_col, "")) if channel_col else ""
         official = creator in CREATORS and creator == channel
+        raw_server_day = str(row.get(day_col, "")).strip() if day_col else ""
+        server_day = int(raw_server_day) if raw_server_day.isdigit() else None
 
         vod_urls = [url.strip() for url in re.split(r"(?=https?://)", str(row[vod_col])) if url.strip()]
         vod_urls = [url for url in vod_urls if url.upper() not in {"N/A", "NA", "-"}]
         title = row.get(title_col, "") if title_col else ""
-        sort_key, display_timestamp = parse_stream_timestamp(raw_date, source_order)
+        sort_key, stream_datetime = parse_stream_timestamp(raw_date, source_order)
 
         records = [
             {
@@ -124,7 +149,9 @@ def parse_vod_rows(rows):
                 "title": title,
                 "platform": detect_platform(url),
                 "official": official,
-                "timestamp": display_timestamp,
+                "server_day": server_day,
+                "stream_order": stream_datetime.isoformat() if isinstance(stream_datetime, datetime) else "",
+                "stream_datetime": stream_datetime,
                 "sort_key": sort_key,
             }
             for url in vod_urls
@@ -135,7 +162,9 @@ def parse_vod_rows(rows):
                 "title": title,
                 "platform": "Unknown",
                 "official": official,
-                "timestamp": display_timestamp,
+                "server_day": server_day,
+                "stream_order": stream_datetime.isoformat() if isinstance(stream_datetime, datetime) else "",
+                "stream_datetime": stream_datetime,
                 "sort_key": sort_key,
             }]
 
@@ -144,7 +173,9 @@ def parse_vod_rows(rows):
     for records in index.values():
         records.sort(key=lambda record: record["sort_key"])
         for record in records:
+            stream_datetime = record.pop("stream_datetime")
             record.pop("sort_key", None)
+        assign_periods(records)
 
     return index
 
@@ -174,6 +205,6 @@ def parse_vod_sheets(sheets):
             vod_index.setdefault(key, []).extend(records)
 
     for records in vod_index.values():
-        records.sort(key=lambda record: record.get("timestamp", ""))
+        assign_periods(records)
 
     return vod_index

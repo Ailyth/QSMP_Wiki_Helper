@@ -56,7 +56,7 @@ The Google service-account file belongs only to the backend hosting service. It 
 
 ## VOD output rules
 
-VOD rows are grouped by canonical `Streamer` and normalized calendar date. The full `Stream Date` timestamp determines their order, so multiple streams on one day are emitted chronologically. URLs are read from `YouTube Vods URL` even when the URL belongs to Twitch, Kick, or another supported platform; the platform is detected from each URL.
+VOD rows are grouped by canonical `Streamer` and normalized calendar date. The full UTC `Stream Date` timestamp determines their order, so multiple streams on one day are emitted chronologically. The first stream is labeled `Morning`; a later stream is labeled `Evening` only when it is at least three hours after the previous stream for that creator. The server day comes from the VOD sheet's `Day` column when present, rather than being inferred from the calendar date or activity sheet. URLs are read from `YouTube Vods URL` even when the URL belongs to Twitch, Kick, or another supported platform; the platform is detected from each URL.
 
 The VOD is official when `Streamer` and `Channel` resolve to the same registered creator in `creators.json`. Otherwise it is unofficial. A single VOD is rendered as a platform-aware `Link` with `(official)` or `(unofficial)`. Multiple VODs are rendered as one numbered `OffStream` block. The reusable block shape is stored in `templates/off_stream.txt` and inserted into the day template.
 

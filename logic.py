@@ -89,18 +89,26 @@ def merge_activity_with_vods(grouped_activity, vod_index, creators_json, timelin
             None
         )
 
-        if activity_entry:
+        # Find VOD
+        vod_records = vod_index.get((creator, date), [])
+        if isinstance(vod_records, dict):
+            vod_records = [vod_records]
+
+        vod_server_days = [
+            record.get("server_day")
+            for record in vod_records
+            if record.get("server_day") is not None
+        ]
+
+        if vod_server_days:
+            server_day = vod_server_days[0]
+        elif activity_entry:
             server_day = activity_entry["server_day"]
         else:
             server_day = timeline_date_to_day.get(date, "—")
 
         # DEBUG 2 — show server day decision
         # print("SERVER DAY DECISION:", creator, date, "→", server_day)
-
-        # Find VOD
-        vod_records = vod_index.get((creator, date), [])
-        if isinstance(vod_records, dict):
-            vod_records = [vod_records]
 
         vod_urls = [record.get("url", "UNAVAILABLE") for record in vod_records]
         vod = "\n".join(url for url in vod_urls if url != "UNAVAILABLE") or "UNAVAILABLE"
