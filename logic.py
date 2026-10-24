@@ -5,6 +5,7 @@ from babel.dates import format_date, get_month_names
 from data_cleaning import canonical_name, normalize_calendar_date, is_excluded_creator
 
 SUPPORTED_LOCALES = {"en", "pl"}
+SERVER_DAY_ONE_DATE = date(2026, 10, 21)
 
 
 def _validate_locale(locale):
@@ -91,6 +92,13 @@ def format_month_heading(date_str, locale="en"):
     return month_name.capitalize() if locale == "pl" else month_name
 
 
+def _infer_server_day(calendar_day):
+    parsed_date = _as_iso_date(calendar_day)
+    if parsed_date < SERVER_DAY_ONE_DATE:
+        return None
+    return (parsed_date - SERVER_DAY_ONE_DATE).days + 1
+
+
 # -----------------------------
 # Merge Logic
 # -----------------------------
@@ -136,10 +144,14 @@ def merge_activity_with_vods(grouped_activity, vod_index, creators_json, timelin
 
         if vod_server_days:
             server_day = vod_server_days[0]
-        elif activity_entry:
+        elif activity_entry and activity_entry.get("server_day") is not None:
             server_day = activity_entry["server_day"]
         else:
-            server_day = timeline_date_to_day.get(date, "—")
+            server_day = timeline_date_to_day.get(date)
+            if server_day is None:
+                server_day = _infer_server_day(date)
+            if server_day is None:
+                server_day = "—"
 
         # DEBUG 2 — show server day decision
         # print("SERVER DAY DECISION:", creator, date, "→", server_day)
