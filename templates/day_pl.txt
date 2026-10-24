@@ -1,6 +1,6 @@
 <!-- DZIEŃ {{DAY}} --> 
 {{Historia
-|tytuł = Day {{DAY}}
+|tytuł = Dzień {{DAY}}
 |data = {{DATE}}
 |vod =  {{VOD_LINK}}
 |podtekst = {{w}} <!-- Usunąć gdy streszczenie jest skończone! -->
