@@ -1,0 +1,8 @@
+<!-- DZIEŃ {{DAY}} --> 
+{{History
+|tytuł = Day {{DAY}}
+|data = {{DATE}}
+|vod =  {{VOD_LINK}}
+|podtekst = {{w}} <!-- Usunąć gdy streszczenie jest skończone! -->
+|treść = TBA 
+}}

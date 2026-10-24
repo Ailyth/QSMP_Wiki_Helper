@@ -39,6 +39,7 @@ def run_app(creators, merged_data, vod_mismatches=None):
 
     selected_creator = tk.StringVar()
     selected_day = tk.StringVar()
+    selected_language = tk.StringVar(value="en")
     day_entries = {}
 
     day_label = tk.Label(left_frame, text="Day template")
@@ -53,7 +54,7 @@ def run_app(creators, merged_data, vod_mismatches=None):
             return
 
         wiki_box.delete("1.0", "end")
-        wiki_box.insert("1.0", generate_day_block(entry))
+        wiki_box.insert("1.0", generate_day_block(entry, selected_language.get()))
 
     day_btn = tk.Button(
         left_frame,
@@ -94,9 +95,50 @@ def run_app(creators, merged_data, vod_mismatches=None):
     wiki_box = tk.Text(right_frame, wrap="word")
     wiki_box.pack(fill="both", expand=True)
 
-    # Copy button
-    copy_btn = tk.Button(right_frame, text="Copy Wiki Code", command=lambda: copy_to_clipboard(wiki_box))
-    copy_btn.pack(fill="x")
+    action_row = tk.Frame(right_frame)
+    action_row.pack(fill="x", pady=(6, 0))
+
+    language_row = tk.Frame(action_row)
+    language_row.pack(side="left")
+
+    ttk.Radiobutton(
+        language_row,
+        text="English",
+        variable=selected_language,
+        value="en",
+        command=lambda: refresh_preview()
+    ).pack(side="left")
+    ttk.Radiobutton(
+        language_row,
+        text="Polish",
+        variable=selected_language,
+        value="pl",
+        command=lambda: refresh_preview()
+    ).pack(side="left", padx=(8, 0))
+
+    copy_btn = tk.Button(action_row, text="Copy text", command=lambda: copy_to_clipboard(wiki_box))
+    copy_btn.pack(side="left", padx=(12, 0))
+
+    def refresh_preview():
+        creator = selected_creator.get()
+        if not creator:
+            wiki_box.delete("1.0", "end")
+            return
+
+        day_label = selected_day.get()
+        if day_label and day_label in day_entries:
+            entry = day_entries[day_label]
+            wiki_box.delete("1.0", "end")
+            wiki_box.insert("1.0", generate_day_block(entry, selected_language.get()))
+            return
+
+        wiki = generate_creator_wiki(merged_data, creator, selected_language.get())
+        wiki_box.delete("1.0", "end")
+        wiki_box.insert("1.0", wiki)
+
+    selected_day.trace_add("write", lambda *_: refresh_preview())
+    selected_language.trace_add("write", lambda *_: refresh_preview())
+    day_menu.bind("<<ComboboxSelected>>", lambda _event=None: refresh_preview())
 
     def on_creator_click(creator):
         selected_creator.set(creator)
@@ -108,10 +150,7 @@ def run_app(creators, merged_data, vod_mismatches=None):
 
         day_menu["values"] = list(day_entries)
         selected_day.set("")
-
-        wiki = generate_creator_wiki(merged_data, creator)
-        wiki_box.delete("1.0", "end")
-        wiki_box.insert("1.0", wiki)
+        refresh_preview()
 
     build_creator_buttons(creator_buttons_frame, creators, on_creator_click)
 

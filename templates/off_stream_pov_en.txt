@@ -1,0 +1,4 @@
+|pov{{INDEX}}={{POV}}
+|url{{INDEX}}={{URL}}
+|platform{{INDEX}}={{PLATFORM}}
+|timestamp{{INDEX}}={{TIMESTAMP}}

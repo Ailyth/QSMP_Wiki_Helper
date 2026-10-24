@@ -1,4 +1,18 @@
+from datetime import date
+
+from babel.dates import format_date, get_month_names
+
 from data_cleaning import canonical_name, normalize_calendar_date, is_excluded_creator
+
+SUPPORTED_LOCALES = {"en", "pl"}
+
+
+def _validate_locale(locale):
+    normalized = (locale or "en").lower()
+    if normalized not in SUPPORTED_LOCALES:
+        raise ValueError(f"Unsupported locale: {locale!r}. Supported locales: {sorted(SUPPORTED_LOCALES)}")
+    return normalized
+
 
 # -----------------------------
 # Date Formatting
@@ -26,19 +40,32 @@ def convert_date_to_wiki_format(date_str):
     return date_str
 
 
-def format_wiki_date(date_str):
-    # Input: "2026-06-02"
-    # Output: "June 2nd, 2026"
+def _as_iso_date(date_str):
+    if isinstance(date_str, date):
+        return date_str
+    if isinstance(date_str, str):
+        return date.fromisoformat(date_str)
+    raise TypeError(f"Unsupported date value: {type(date_str).__name__}")
 
-    year, month, day = date_str.split("-")
-    day = int(day)
 
-    months = {
-        "01": "January", "02": "February", "03": "March",
-        "04": "April",   "05": "May",      "06": "June",
-        "07": "July",    "08": "August",   "09": "September",
-        "10": "October", "11": "November", "12": "December"
-    }
+def format_wiki_date(date_str, locale="en"):
+    """Return a language-specific wiki date string.
+
+    English keeps the current ordinal format: "June 2nd, 2026".
+    Polish uses the localized calendar format: "2 czerwca 2026".
+    """
+    locale = _validate_locale(locale)
+    parsed_date = _as_iso_date(date_str)
+
+    if locale == "pl":
+        return format_date(parsed_date, format="d MMMM y", locale=locale)
+
+    year = str(parsed_date.year)
+    month = parsed_date.month
+    day = parsed_date.day
+
+    month_names = get_month_names(width="wide", locale=locale, context="format")
+    month_name = month_names[month]
 
     if 11 <= day <= 13:
         suffix = "th"
@@ -53,8 +80,14 @@ def format_wiki_date(date_str):
         else:
             suffix = "th"
 
-    month_name = months[month]
     return f"{month_name} {day}{suffix}, {year}"
+
+
+def format_month_heading(date_str, locale="en"):
+    locale = _validate_locale(locale)
+    parsed_date = _as_iso_date(date_str)
+    month_names = get_month_names(width="wide", locale=locale, context="stand-alone")
+    return month_names[parsed_date.month]
 
 
 # -----------------------------

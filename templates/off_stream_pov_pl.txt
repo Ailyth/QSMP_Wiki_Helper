@@ -1,0 +1,4 @@
+|pov{{INDEX}}={{POV}}
+|link{{INDEX}}={{URL}}
+|platforma{{INDEX}}={{PLATFORM}}
+|sygnatura{{INDEX}}={{TIMESTAMP}}

@@ -1,11 +1,36 @@
 import os
 
+from logic import format_month_heading, format_wiki_date
 
-def format_status(record):
-    return "official" if record.get("official") else "unofficial"
+VALID_LANGUAGES = {"en", "pl"}
 
 
-def build_vod_markup(entry):
+def _validate_language(language):
+    normalized = (language or "en").lower()
+    if normalized not in VALID_LANGUAGES:
+        raise ValueError(f"Unsupported language: {language!r}. Supported languages: {sorted(VALID_LANGUAGES)}")
+    return normalized
+
+
+def _load_template(template_name, language="en"):
+    language = _validate_language(language)
+    template_path = os.path.join("templates", f"{template_name}_{language}.txt")
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(f"Template not found: {template_path}")
+
+    with open(template_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+
+def format_status(record, language="en"):
+    language = _validate_language(language)
+    if record.get("official"):
+        return "official" if language == "en" else "oficjalny"
+    return "unofficial" if language == "en" else "nieoficjalny"
+
+
+def build_vod_markup(entry, language="en"):
+    language = _validate_language(language)
     records = entry.get("vods")
     if records is None:
         records = [{
@@ -15,7 +40,10 @@ def build_vod_markup(entry):
             "timestamp": "",
         }]
 
-    records = [record for record in records if record.get("url") != "UNAVAILABLE"]
+    records = [
+        record for record in records
+        if record.get("url") not in (None, "", "UNAVAILABLE")
+    ]
     if not records:
         return "UNAVAILABLE"
 
@@ -25,37 +53,41 @@ def build_vod_markup(entry):
         platform = record.get("platform", "Youtube")
         return (
             f"{{{{Link|{platform}|url={record['url']}}}}} "
-            f"({format_status(record)})"
+            f"({format_status(record, language)})"
         )
 
-    template_path = os.path.join("templates", "off_stream.txt")
-    with open(template_path, "r", encoding="utf-8") as file:
-        template = file.read()
+    template = _load_template("off_stream", language)
+    partial_template = _load_template("off_stream_pov", language)
 
     fields = []
     for index, record in enumerate(records, start=1):
         suffix = "" if index == 1 else f" {index}"
-        fields.extend([
-            f"|pov{suffix}={creator}",
-            f"|url{suffix}={record['url']}",
-            f"|platform{suffix}={record.get('platform', 'Unknown')}",
-            f"|timestamp{suffix}={record.get('timestamp', '')} ({format_status(record)})",
-        ])
+        field_block = (
+            partial_template
+            .replace("{{INDEX}}", suffix)
+            .replace("{{POV}}", creator)
+            .replace("{{URL}}", record.get("url", ""))
+            .replace("{{PLATFORM}}", record.get("platform", "Unknown"))
+            .replace(
+                "{{TIMESTAMP}}",
+                f"{record.get('timestamp', '')} ({format_status(record, language)})"
+            )
+        )
+        fields.append(field_block)
 
     return template.replace("{{OFF_STREAM_FIELDS}}", "\n".join(fields)).rstrip()
+
 
 # -----------------------------
 # Day Block Generator
 # -----------------------------
-def generate_day_block(entry):
-    template_path = os.path.join("templates", "day.txt")
+def generate_day_block(entry, language="en"):
+    language = _validate_language(language)
+    template = _load_template("day", language)
 
-    with open(template_path, "r", encoding="utf-8") as f:
-        template = f.read()
-
-    day = str(entry["server_day"])
-    date = entry["wiki_date"]      # already wiki formatted
-    vod_link = build_vod_markup(entry)
+    day = str(entry.get("server_day", ""))
+    date = format_wiki_date(entry.get("calendar_day", entry.get("wiki_date", "1970-01-01")), language)
+    vod_link = build_vod_markup(entry, language)
 
     return (
         template
@@ -68,17 +100,13 @@ def generate_day_block(entry):
 # -----------------------------
 # Month Block Generator
 # -----------------------------
-def generate_month_block(month_name, day_blocks):
-    # 1. Load month template
-    template_path = os.path.join("templates", "month.txt")
-    with open(template_path, "r", encoding="utf-8") as f:
-        template = f.read()
+def generate_month_block(month_name, day_blocks, language="en"):
+    language = _validate_language(language)
+    template = _load_template("month", language)
 
-    # 2. Prepare replacements
     month_upper = month_name.upper()
     joined_days = "\n".join(day_blocks)
 
-    # 3. Replace placeholders
     block = (
         template
         .replace("{{MONTH_NAME}}", month_name)
@@ -92,37 +120,20 @@ def generate_month_block(month_name, day_blocks):
 # -----------------------------
 # Creator Wiki Generator
 # -----------------------------
-def generate_creator_wiki(merged_data, creator):
-    # 1. Get full history for this creator
+def generate_creator_wiki(merged_data, creator, language="en"):
+    language = _validate_language(language)
     history = merged_data.get(creator, [])
-
-    # 2. Group entries by month name
     months = {}
 
     for entry in history:
-        # calendar_day is already formatted: "April 25th, 2026"
-        formatted_date = entry["wiki_date"]
-        month_name = formatted_date.split()[0]
+        month_name = format_month_heading(entry.get("calendar_day", entry.get("wiki_date", "1970-01-01")), language)
+        months.setdefault(month_name, []).append(entry)
 
-
-        # Extract month name (first word)
-        month_name = formatted_date.split()[0]
-
-        if month_name not in months:
-            months[month_name] = []
-
-        months[month_name].append(entry)
-
-    # 3. Build month blocks
     month_blocks = []
 
     for month_name, entries in months.items():
-        # Generate day blocks for this month
-        day_blocks = [generate_day_block(e) for e in entries]
-
-        # Generate month block
-        month_block = generate_month_block(month_name, day_blocks)
+        day_blocks = [generate_day_block(e, language) for e in entries]
+        month_block = generate_month_block(month_name, day_blocks, language)
         month_blocks.append(month_block)
 
-    # 4. Join all month blocks
     return "\n\n".join(month_blocks)
