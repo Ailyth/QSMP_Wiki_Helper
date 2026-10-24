@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import os
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -164,6 +164,7 @@ def creator_history(creator: str) -> CreatorResponse:
 def creator_wiki(
     creator: str,
     months: str | None = Query(default=None),
+    language: Literal["en", "pl"] = "en",
 ) -> WikiResponse:
     result = _require_data()
     history = result.merged_data.get(creator)
@@ -191,12 +192,16 @@ def creator_wiki(
 
     return WikiResponse(
         creator=creator,
-        wiki=generate_creator_wiki({creator: history}, creator),
+        wiki=generate_creator_wiki({creator: history}, creator, language),
     )
 
 
 @app.get("/api/creators/{creator}/days/{calendar_day}/wiki", response_model=WikiResponse)
-def creator_day_wiki(creator: str, calendar_day: str) -> WikiResponse:
+def creator_day_wiki(
+    creator: str,
+    calendar_day: str,
+    language: Literal["en", "pl"] = "en",
+) -> WikiResponse:
     result = _require_data()
     history = result.merged_data.get(creator)
     if history is None:
@@ -214,7 +219,7 @@ def creator_day_wiki(creator: str, calendar_day: str) -> WikiResponse:
 
     return WikiResponse(
         creator=creator,
-        wiki=generate_day_block(entry),
+        wiki=generate_day_block(entry, language),
     )
 
 

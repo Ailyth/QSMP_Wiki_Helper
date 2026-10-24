@@ -42,6 +42,7 @@ function App() {
   const [selectedCreator, setSelectedCreator] = useState("");
   const [creatorData, setCreatorData] = useState(null);
   const [wiki, setWiki] = useState("");
+  const [wikiLanguage, setWikiLanguage] = useState("en");
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [search, setSearch] = useState("");
@@ -91,7 +92,7 @@ function App() {
     try {
       const [history, wikiData] = await Promise.all([
         request(`/api/creators/${encodeURIComponent(creator)}`),
-        request(`/api/creators/${encodeURIComponent(creator)}/wiki`),
+        request(`/api/creators/${encodeURIComponent(creator)}/wiki?language=${wikiLanguage}`),
       ]);
       setCreatorData(history);
       setWiki(wikiData.wiki);
@@ -104,13 +105,13 @@ function App() {
     }
   }
 
-  async function generateDayTemplate(day = selectedDay) {
+  async function generateDayTemplate(day = selectedDay, language = wikiLanguage) {
     if (!selectedCreator || !day) return;
 
     setError("");
     try {
       const dayData = await request(
-        `/api/creators/${encodeURIComponent(selectedCreator)}/days/${encodeURIComponent(day)}/wiki`,
+        `/api/creators/${encodeURIComponent(selectedCreator)}/days/${encodeURIComponent(day)}/wiki?language=${language}`,
       );
       setWiki(dayData.wiki);
       setNotice("Single-day template generated.");
@@ -119,14 +120,18 @@ function App() {
     }
   }
 
-  async function generateMonthTemplates(months = selectedMonths) {
-    if (!selectedCreator || !months.length) return;
+  async function generateMonthTemplates(months = selectedMonths, language = wikiLanguage) {
+    if (!selectedCreator) return;
+    if (!months.length) {
+      await generateAllTemplates(language);
+      return;
+    }
 
     setError("");
     try {
       const monthQuery = encodeURIComponent(months.join(","));
       const monthData = await request(
-        `/api/creators/${encodeURIComponent(selectedCreator)}/wiki?months=${monthQuery}`,
+        `/api/creators/${encodeURIComponent(selectedCreator)}/wiki?months=${monthQuery}&language=${language}`,
       );
       setWiki(monthData.wiki);
       setNotice("Selected month templates generated.");
@@ -135,8 +140,39 @@ function App() {
     }
   }
 
-  function copyWiki() {
-    navigator.clipboard.writeText(wiki).then(() => setNotice("Wiki text copied."));
+  async function generateAllTemplates(language = wikiLanguage) {
+    if (!selectedCreator) return;
+
+    setError("");
+    try {
+      const wikiData = await request(
+        `/api/creators/${encodeURIComponent(selectedCreator)}/wiki?language=${language}`,
+      );
+      setWiki(wikiData.wiki);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  async function changeWikiLanguage(language) {
+    setWikiLanguage(language);
+    if (selectedDay) {
+      await generateDayTemplate(selectedDay, language);
+    } else if (selectedMonths.length) {
+      await generateMonthTemplates(selectedMonths, language);
+    } else {
+      await generateAllTemplates(language);
+    }
+  }
+
+  async function copyWiki() {
+    if (!wiki) return;
+    try {
+      await navigator.clipboard.writeText(wiki);
+      setNotice(`${wikiLanguage === "pl" ? "Polish" : "English"} template copied.`);
+    } catch {
+      setError("Unable to copy the template. Check clipboard permissions and try again.");
+    }
   }
 
   function downloadWiki() {
@@ -237,6 +273,8 @@ function App() {
             selectCreator={selectCreator}
             creatorData={creatorData}
             wiki={wiki}
+            wikiLanguage={wikiLanguage}
+            changeWikiLanguage={changeWikiLanguage}
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             generateDayTemplate={generateDayTemplate}
@@ -278,7 +316,7 @@ function Overview({ overview }) {
   );
 }
 
-function CreatorsView({ creators, search, setSearch, selectedCreator, selectCreator, creatorData, wiki, selectedDay, setSelectedDay, generateDayTemplate, selectedMonths, setSelectedMonths, generateMonthTemplates, loadingCreator, copyWiki, downloadWiki }) {
+function CreatorsView({ creators, search, setSearch, selectedCreator, selectCreator, creatorData, wiki, wikiLanguage, changeWikiLanguage, selectedDay, setSelectedDay, generateDayTemplate, selectedMonths, setSelectedMonths, generateMonthTemplates, loadingCreator, copyWiki, downloadWiki }) {
   const availableMonths = creatorData
     ? [...new Set(creatorData.history.map((entry) => entry.wiki_date.split(" ")[0]))]
     : [];
@@ -294,9 +332,7 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
 
     setSelectedMonths(nextMonths);
     setSelectedDay("");
-    if (nextMonths.length) {
-      generateMonthTemplates(nextMonths);
-    }
+    generateMonthTemplates(nextMonths);
   }
 
   function selectDay(day) {
@@ -356,10 +392,64 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
                 Generate selected months
               </button>
               {selectedMonths.length > 0 && (
-                <button className="text-button" onClick={() => setSelectedMonths([])}>
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setSelectedMonths([]);
+                    setSelectedDay("");
+                    generateMonthTemplates([]);
+                  }}
+                >
                   Show all months
                 </button>
               )}
+            </div>
+            <div className="wiki-panel">
+              <div className="wiki-panel-heading">
+                <div>
+                  <p className="eyebrow">Generated template</p>
+                  <h3>Preview and copy</h3>
+                  <p className="wiki-help">Choose a language, then copy the template for your wiki.</p>
+                </div>
+                <button className="primary-button copy-wiki-button" onClick={copyWiki} disabled={!wiki}>
+                  Copy {wikiLanguage === "pl" ? "Polish" : "English"} template
+                </button>
+              </div>
+              <div className="wiki-language-controls" role="group" aria-label="Template language">
+                <span>Template language</span>
+                <button
+                  className={wikiLanguage === "en" ? "language-button active" : "language-button"}
+                  onClick={() => changeWikiLanguage("en")}
+                  aria-pressed={wikiLanguage === "en"}
+                >
+                  English
+                </button>
+                <button
+                  className={wikiLanguage === "pl" ? "language-button active" : "language-button"}
+                  onClick={() => changeWikiLanguage("pl")}
+                  aria-pressed={wikiLanguage === "pl"}
+                >
+                  Polish
+                </button>
+              </div>
+              <div className="day-template-controls">
+                <label htmlFor="day-template-select">Generate one day</label>
+                <select id="day-template-select" value={selectedDay} onChange={(event) => selectDay(event.target.value)}>
+                  <option value="">Select a day</option>
+                  {visibleHistory.map((entry) => (
+                    <option key={entry.calendar_day} value={entry.calendar_day}>
+                      Day {entry.server_day} - {entry.wiki_date}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                className="wiki-preview"
+                value={wiki}
+                readOnly
+                aria-label={`${wikiLanguage === "pl" ? "Polish" : "English"} wiki template preview`}
+                placeholder="Select a creator to preview their wiki template."
+              />
             </div>
             <div className="history-list">
               {visibleHistory.map((entry) => {
@@ -373,21 +463,6 @@ function CreatorsView({ creators, search, setSearch, selectedCreator, selectCrea
                 </div>
                 );
               })}
-            </div>
-            <div className="wiki-panel">
-              <div className="detail-heading"><div><p className="eyebrow">Wiki preview</p><h3>Ready to copy</h3></div><div className="button-group"><button className="secondary-button small" onClick={copyWiki}>Copy text</button></div></div>
-              <div className="day-template-controls">
-                <label htmlFor="day-template-select">Generate one day</label>
-                <select id="day-template-select" value={selectedDay} onChange={(event) => selectDay(event.target.value)}>
-                  <option value="">Select a day</option>
-                  {visibleHistory.map((entry) => (
-                    <option key={entry.calendar_day} value={entry.calendar_day}>
-                      Day {entry.server_day} - {entry.wiki_date}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <textarea value={wiki} readOnly aria-label="Generated wiki text" />
             </div>
           </>
         )}
