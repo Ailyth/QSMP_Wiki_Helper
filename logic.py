@@ -87,7 +87,8 @@ def format_month_heading(date_str, locale="en"):
     locale = _validate_locale(locale)
     parsed_date = _as_iso_date(date_str)
     month_names = get_month_names(width="wide", locale=locale, context="stand-alone")
-    return month_names[parsed_date.month]
+    month_name = month_names[parsed_date.month]
+    return month_name.capitalize() if locale == "pl" else month_name
 
 
 # -----------------------------
