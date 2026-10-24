@@ -23,6 +23,22 @@ PLATFORM_HOSTS = {
     "nicovideo.jp": "Niconico",
 }
 
+ANNOTATED_DAY_START = "2026-10-01"
+
+
+def parse_server_day(value, calendar_day):
+    raw_day = str(value).strip()
+    if raw_day.isdigit():
+        return int(raw_day)
+
+    if calendar_day >= ANNOTATED_DAY_START:
+        annotated_day = re.fullmatch(r"\d+\s*\((\d+)\)", raw_day)
+        if annotated_day:
+            return int(annotated_day.group(1))
+
+    return None
+
+
 def is_month_sheet(name):
     parts = name.split()
     if len(parts) != 2:
@@ -136,7 +152,7 @@ def parse_vod_rows(rows):
         channel = canonical_name(row.get(channel_col, "")) if channel_col else ""
         official = creator in CREATORS and creator == channel
         raw_server_day = str(row.get(day_col, "")).strip() if day_col else ""
-        server_day = int(raw_server_day) if raw_server_day.isdigit() else None
+        server_day = parse_server_day(raw_server_day, date)
 
         vod_urls = [url.strip() for url in re.split(r"(?=https?://)", str(row[vod_col])) if url.strip()]
         vod_urls = [url for url in vod_urls if url.upper() not in {"N/A", "NA", "-"}]
