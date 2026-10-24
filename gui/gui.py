@@ -98,27 +98,6 @@ def run_app(creators, merged_data, vod_mismatches=None):
     action_row = tk.Frame(right_frame)
     action_row.pack(fill="x", pady=(6, 0))
 
-    language_row = tk.Frame(action_row)
-    language_row.pack(side="left")
-
-    ttk.Radiobutton(
-        language_row,
-        text="English",
-        variable=selected_language,
-        value="en",
-        command=lambda: refresh_preview()
-    ).pack(side="left")
-    ttk.Radiobutton(
-        language_row,
-        text="Polish",
-        variable=selected_language,
-        value="pl",
-        command=lambda: refresh_preview()
-    ).pack(side="left", padx=(8, 0))
-
-    copy_btn = tk.Button(action_row, text="Copy text", command=lambda: copy_to_clipboard(wiki_box))
-    copy_btn.pack(side="left", padx=(12, 0))
-
     def refresh_preview():
         creator = selected_creator.get()
         if not creator:
@@ -136,8 +115,24 @@ def run_app(creators, merged_data, vod_mismatches=None):
         wiki_box.delete("1.0", "end")
         wiki_box.insert("1.0", wiki)
 
+    def generate_in_language(language):
+        selected_language.set(language)
+        refresh_preview()
+
+    tk.Button(
+        action_row,
+        text="Generate English",
+        command=lambda: generate_in_language("en")
+    ).pack(side="left")
+    tk.Button(
+        action_row,
+        text="Generate Polish",
+        command=lambda: generate_in_language("pl")
+    ).pack(side="left", padx=(8, 0))
+    copy_btn = tk.Button(action_row, text="Copy text", command=lambda: copy_to_clipboard(wiki_box))
+    copy_btn.pack(side="left", padx=(12, 0))
+
     selected_day.trace_add("write", lambda *_: refresh_preview())
-    selected_language.trace_add("write", lambda *_: refresh_preview())
     day_menu.bind("<<ComboboxSelected>>", lambda _event=None: refresh_preview())
 
     def on_creator_click(creator):
