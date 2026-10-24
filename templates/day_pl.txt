@@ -1,5 +1,5 @@
 <!-- DZIEŃ {{DAY}} --> 
-{{History
+{{Historia
 |tytuł = Day {{DAY}}
 |data = {{DATE}}
 |vod =  {{VOD_LINK}}
